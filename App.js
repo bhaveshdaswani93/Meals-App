@@ -22,7 +22,7 @@ export default function App() {
   if(!fontLoaded) {
     return <AppLoading 
       startAsync={registerFont}
-      onFinish={setFontLoaded(true)}
+      onFinish={()=>setFontLoaded(true)}
     />
   }
 
