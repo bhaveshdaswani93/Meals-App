@@ -1,11 +1,18 @@
 import React from "react";
 import {View, StyleSheet, FlatList } from "react-native";
+import { useSelector } from 'react-redux';
 
 import MealItem from '../components/MealItem';
+// import console = require("console");
 
 
 const MealList = props => {
+  const favMeals = useSelector(state=>state.meals.favMeals)
+  console.log('meallist comp: ',favMeals)
+
   const renderMeal = itemData => {
+    const isFavaourite = favMeals.some(meal=>meal.id === itemData.item.id)
+    console.log('meallist comp isFav: ',isFavaourite)
     return (
       <MealItem
         image={itemData.item.imageUrl}
@@ -17,7 +24,9 @@ const MealList = props => {
           props.navigation.navigate({
             routeName: "MealDetail",
             params: {
-              mealId: itemData.item.id
+              mealId: itemData.item.id,
+              mealTitle:itemData.item.title,
+              isFav:isFavaourite
             }
           });
         }}
@@ -27,6 +36,7 @@ const MealList = props => {
   return (
     <View style={styles.screen}>
       <FlatList
+      extraData={favMeals}
         data={props.data}
         keyExtractor={item => item.id}
         renderItem={renderMeal}

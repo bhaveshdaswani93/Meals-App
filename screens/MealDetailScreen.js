@@ -1,21 +1,43 @@
-import React from "react";
+import React,{ useEffect,useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Button,
   Image,
   ScrollView
 } from "react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
+import { useSelector,useDispatch } from 'react-redux';
 
-import { MEALS } from "../data/dummy-data";
 import HeaderButton from "../components/HeaderButton";
-import DefautText from '../components/DefautText'
+import DefautText from '../components/DefautText';
+import { toggleFavourite } from "../store/actions/meals";
 
 const MealDetailScreen = props => {
+  const availableMeals = useSelector(state=>state.meals.meals)
   const mealId = props.navigation.getParam("mealId");
-  const meal = MEALS.find(meal => meal.id === mealId);
+  const meal = availableMeals.find(meal => meal.id === mealId);
+  const dispatch = useDispatch();
+  const isFavMeal = useSelector(state=>state.meals.favMeals.some(mealfav=>mealfav.id === meal.id))
+  
+  const toggleFavouriteHandler = useCallback(() =>{
+    dispatch(toggleFavourite(meal.id))
+  },[meal,dispatch])
+
+  
+
+  useEffect(()=>{
+    // props.navigation.setParams({mealTitle:meal.title})
+    props.navigation.setParams({
+      toggleFav:toggleFavouriteHandler
+    })
+  },[toggleFavouriteHandler])
+  useEffect(()=>{
+    props.navigation.setParams({
+      isFav:isFavMeal
+    })
+  },[isFavMeal])
+  
   return (
     <ScrollView>
       <Image source={{uri:meal.imageUrl}} style={styles.image} />
@@ -33,14 +55,17 @@ const MealDetailScreen = props => {
 };
 
 MealDetailScreen.navigationOptions = navObj => {
-  const mealId = navObj.navigation.getParam("mealId");
-  const meal = MEALS.find(meal => meal.id === mealId);
+  // const mealId = navObj.navigation.getParam("mealId");
+  // const meal = MEALS.find(meal => meal.id === mealId);
+  const toggleFavourite = navObj.navigation.getParam('toggleFav')
+  const mealTitle = navObj.navigation.getParam('mealTitle')
+  const isFav = navObj.navigation.getParam('isFav')
 
   return {
-    title: meal.title,
+    title: mealTitle,
     headerRight: (
       <HeaderButtons HeaderButtonComponent={HeaderButton}>
-        <Item title="Favourite" iconName="ios-star" />
+        <Item title="Favourite" iconName={isFav?"ios-star":"ios-star-outline"} onPress={toggleFavourite} />
       </HeaderButtons>
     )
   };
